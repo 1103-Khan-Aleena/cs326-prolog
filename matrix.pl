@@ -1,18 +1,21 @@
-% Aleena Khan
-% CS 326 HW 4
-% rotating a matrix 90 clockwise
+%Aleena Khan
+%CS 326 HW 4
+%rotate a matrix 90 clockwise
 
-%my matrix from last hw
-row(1, [1,  2,  3,  4]).
-row(2, [5,  6,  7,  8]).
-row(3, [9, 10, 11, 12]).
+:- use_module(library(readutil)).
 
-%grab all 3 rows into a list
-get_matrix([R1, R2, R3]) :-
-    row(1, R1),
-    row(2, R2),
-    row(3, R3).
+%read matrix from file
+get_matrix(File, Matrix) :-
+    read_file_to_string(File, Content, []),
+    split_string(Content, "\n", "", Lines),
+    exclude(==(""), Lines, CleanLines),
+    maplist(parse_row, CleanLines, Matrix).
 
+%parse each line into a list of numbers
+parse_row(Line, Row) :-
+    split_string(Line, " ", " ", Parts),
+    exclude(==(""), Parts, CleanParts),
+    maplist(number_string, Row, CleanParts).
 
 %transpose flips rows into columns
 transpose([], []).
@@ -22,17 +25,17 @@ transpose(Matrix, [Row|Rest]) :-
     tails(Matrix, Tails),
     transpose(Tails, Rest).
 
-%get first element of each row
+%first element of every row
 heads([], []).
 heads([[H|_]|Rows], [H|Hs]) :-
     heads(Rows, Hs).
 
-%get tail of each row
+%everything after first element
 tails([], []).
 tails([[_|T]|Rows], [T|Ts]) :-
     tails(Rows, Ts).
 
-%reverse
+%reverse a list
 rev([], []).
 rev([H|T], R) :-
     rev(T, RT),
@@ -48,17 +51,18 @@ reverse_rows([Row|Rest], [Rev|Revs]) :-
     rev(Row, Rev),
     reverse_rows(Rest, Revs).
 
-%print each row on its own line
+%print each row
 print_matrix([]).
 print_matrix([Row|Rest]) :-
     write(Row), nl,
     print_matrix(Rest).
 
-
+%main
 main :-
-    get_matrix(M),
+    get_matrix("matrix.txt", M),
     write('Original:'), nl,
     print_matrix(M),
     rotate(M, R),
     write('Rotated:'), nl,
     print_matrix(R).
+
